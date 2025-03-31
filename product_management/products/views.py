@@ -1,7 +1,13 @@
-from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
+import csv
+import threading
+import queue
 
-from rest_framework.generics import ListCreateAPIView, ListAPIView
+from django.contrib.auth import authenticate
+from django.contrib.messages.storage import default_storage
+from django.http import JsonResponse
+from django.core.files.storage import default_storage
+
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 from rest_framework.pagination import PageNumberPagination
@@ -27,17 +33,6 @@ def generate_token(request):
 class ProductPagination(PageNumberPagination):
     page_size = 10
 
-
-
-import csv
-import threading
-import queue
-
-from django.contrib.messages.storage import default_storage
-from django.http import JsonResponse
-from django.core.files.storage import default_storage
-
-from .models import Product
 
 product_queue = queue.Queue()
 
@@ -77,11 +72,9 @@ def import_products(request):
         return Response({"error": "CSV file required"}, status=400)
 
     file = request.FILES['file']
-    # path = "products_export_1.csv"
-    # print(path, '&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
     # Get file using arg
     file_path = default_storage.save("products_export_1.csv", file)
-    print(file_path, '******************************')
+    print(file_path, 'file path')
 
     # Generate thread process
     thread = threading.Thread(target=process_csv, args=(file_path, None))
