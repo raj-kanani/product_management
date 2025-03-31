@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    ports: "8000:8000"
+  redis:
+    image: "redis:alpine"
+  celery:
+    build: .
+    command:  celery -A product_management worker --loglevel=info
