@@ -60,9 +60,7 @@ GET: http://127.0.0.1:8000/api/search-products/?query=dsf
 # Build docker image using container and run celery using docker
 
 docker-compose up --build  
-docker-compose exec web celery -A product_management worker --loglevel=info  
 
-
-# Run docker with redis
+# Run docker with redis (optional)
 docker run -d --name redis -p 6379:6379 redis
 
