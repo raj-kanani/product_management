@@ -45,59 +45,65 @@ product_queue = queue.Queue()
 @permission_classes([IsAuthenticated])
 def import_products(request):
     if "file" not in request.FILES:
-        return Response({"error": "CSV file required"}, status=400)
+        return JsonResponse({"error": "CSV file required"}, status=400)
 
     file = request.FILES['file']
-    # Get file using arg
-    file_path = default_storage.save("products/" + file.name, file)
-    print(file_path, 'file path')
 
-    absolute_path = default_storage.path(file_path)
-    print(absolute_path, "absolute path")
-    # Generate thread process
-    thread = threading.Thread(target=process_csv, args=(absolute_path,))
+    # Save the uploaded file
+    file_path = default_storage.save('products/' + file.name, file)  # Path to store the file
+    print(f"File saved at: {file_path}")
+
+    # Get the absolute file path
+    absolute_file_path = default_storage.path(file_path)
+    print(f"Absolute file path: {absolute_file_path}")
+
+    # Start threading to process the CSV file in the background
+    thread = threading.Thread(target=process_csv, args=(absolute_file_path,))
     thread.start()
 
-    return JsonResponse({"message": "Product import successfully "})
+    return JsonResponse({"message": "Product import started."})
 
 
 def process_csv(file_path):
-    with open(file_path, newline='', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        # Add data from csv
-        for row in reader:
-            # product_queue.put(row)
-            handle = row["Handle"]
-            title = row["Title"]
-            body = row["Body (HTML)"]
-            vendor = row["Vendor"]
-            type = row["Type"]
-            tags = row["Tags"]
-            published = row["Published"]
-            variant_sku = row["Variant SKU"]
-            # variant_inventory_tracker = row["Variant Inventory Tracker"]
-            variant_price = row["Variant Price"]
-            image_src = row["Image Src"]
+    try:
+        # Open the file using the absolute path
+        with open(file_path, newline='', encoding='utf-8') as file:
+            csv_reader = csv.DictReader(file)
 
-        product, created = Product.objects.update_or_create(
-            handle= handle,
-            defaults={
-                "title": title,
-                "body": body,
-                "vendor": vendor,
-                "type": type,
-                "tags": tags,
-                "published": published,
-                "variant_sku": variant_sku,
-                # "variant_inventory_tracker": variant_inventory_tracker,
-                "variant_price": variant_price,
-                "image_src": image_src,
-            }
+            for row in csv_reader:
+                # Process each row of the CSV and create Product records
+                handle = row['Handle']
+                title = row['Title']
+                body = row['Body (HTML)']
+                vendor = row['Vendor']
+                type = row['Type']
+                tags = row['Tags']
+                published = row['Published']
+                variant_sku = row['Variant SKU']
+                variant_price = row['Variant Price']
+                image_src = row['Image Src']
 
-        )
-        print(f"product processed:{title}, created:{created}")
+                # Create product or update existing one
+                product, created = Product.objects.update_or_create(
+                    handle=handle,
+                    defaults={
+                        'title': title,
+                        'body': body,
+                        'vendor': vendor,
+                        'type': type,
+                        'tags': tags,
+                        'published': published,
+                        'variant_sku': variant_sku,
+                        'variant_price': variant_price,
+                        'image_src': image_src,
+                    }
+                )
 
-    print(f"Error processing file")
+                # Print status of product creation/update
+                print(f"Processed product: {title}, Created: {created}")
+
+    except Exception as e:
+        print(f"Error processing file: {e}")
 
 class ProductListAPIView(ListCreateAPIView):
     queryset = Product.objects.filter(is_deleted=False)
