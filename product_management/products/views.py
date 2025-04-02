@@ -10,7 +10,7 @@ from django.core.files.storage import default_storage
 from celery import shared_task
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
-from .tasks import generate_products
+from .tasks import generate_products, soft_delete_products
 
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.decorators import api_view, permission_classes
@@ -44,6 +44,16 @@ def search_products(request):
         products.values("handle", "title", "type", "image_src", "variant_price", "variant_sku", "published"))
 
     return JsonResponse({"products": product_list})
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def delete_product(request):
+    product_ids = request.data.get("product_ids", [])
+    if not product_ids:
+        return Response({"error": "No product IDs provided"}, status=400)
+
+    soft_delete_products.delay(product_ids)  # Celery task
+    return Response({"message": "Products soft deleted, will be hard deleted in 12 hours."})
 
 
 @api_view(["POST"])
