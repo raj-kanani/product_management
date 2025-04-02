@@ -22,7 +22,6 @@ from rest_framework.authentication import TokenAuthentication
 from .models import Product
 from .serializers import ProductSerializer
 
-@csrf_exempt
 @api_view(["POST"])
 def generate_token(request):
     username = request.data.get("username")
@@ -134,6 +133,7 @@ def generate_products(num_products):
     Product.objects.bulk_create(products)
     return f"{num_products} product generated successfully"
 
+@csrf_exempt
 def generate_product_view(request):
     if request.method == "POST":
         num_products = int(request.POST.get("num_products", 0))
