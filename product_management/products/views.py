@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 from celery import shared_task
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from .tasks import generate_products
 
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.decorators import api_view, permission_classes
@@ -19,8 +20,31 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 
-from .models import Product
 from .serializers import ProductSerializer
+from django.db.models import Q
+from .models import Product
+
+
+def search_products(request):
+    query = request.GET.get("query", "").strip().lower()
+
+    if not query:
+        products = Product.objects.all()
+    else:
+        products = Product.objects.filter(
+            Q(handle__icontains=query) |
+            Q(title__icontains=query) |
+            Q(type__icontains=query) |
+            Q(variant_price__icontains=query) |
+            Q(variant_sku__icontains=query) |
+            Q(published__icontains=query)
+        )
+
+    product_list = list(
+        products.values("handle", "title", "type", "image_src", "variant_price", "variant_sku", "published"))
+
+    return JsonResponse({"products": product_list})
+
 
 @api_view(["POST"])
 def generate_token(request):
@@ -116,27 +140,13 @@ class ProductListAPIView(ListCreateAPIView):
         # search product on product title field.
         return Product.objects.filter(title__icontains=search_data, is_deleted=False)
 
-import random
-@shared_task
-def generate_products(num_products):
-    products = [
-        Product(
-            handle = f"product-{random.randint(1000, 9000)}",
-            title = f"product-{random.randint(1, 1000)}",
-            image_src = "http://google.com/100", type=random.choice(["Electronics", "Clothing", "Furniture"]),
-            variant_price = round(random.uniform(10,500)),
-            variant_sku = f"SKU{random.randint(1000, 9999)}",
-            published = random.choice([True, False]) )
-            for _ in range (num_products)
-        ]
-
-    Product.objects.bulk_create(products)
-    return f"{num_products} product generated successfully"
 
 @csrf_exempt
 def generate_product_view(request):
     if request.method == "POST":
-        num_products = int(request.POST.get("num_products", 0))
-        generate_products.delay(num_products)
-        return JsonResponse({"message": "Product generate using celery" })
-    return render(request, 'generate_products.html')
+        num_products = request.POST.get("num_products")
+        if not num_products or not num_products.isdigit() or int(num_products) <= 0:
+            return JsonResponse({"error": "Invalid input"}, status=400)
+        generate_products.delay(int(num_products))
+        return JsonResponse({"message": "Product generation started using Celery."})
+    return render(request, "generate_products.html")

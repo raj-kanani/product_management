@@ -1,5 +1,14 @@
 version: '3'
+
 services:
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6380:6379"  # Keep the external mapping if needed
+    networks:
+      - django_network
+
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -9,19 +18,19 @@ services:
       - "8000:8000"
     networks:
       - django_network
+    depends_on:
+      - redis
 
-#celery:
-#    build: .
-#    command: celery -A product_management worker --loglevel=info
-#    volumes:
-#      - .:/app
-#    depends_on:
-#      - redis
-#    networks:
-#      - django_network
-
+  celery_worker:
+    build: .
+    command: celery -A product_management worker --loglevel=info
+    depends_on:
+      - redis
+    networks:
+      - django_network
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
 
 networks:
   django_network:
     driver: bridge
-

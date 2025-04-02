@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Products</title>
+    <script>
+        async function searchProducts() {
+            let query = document.getElementById("search").value;
+            let response = await fetch(`/api/search-products/?query=${query}`);
+            let data = await response.json();
+            let tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = ""; // Clear table
+
+            data.products.forEach(product => {
+                let row = `<tr>
+                    <td>${product.handle}</td>
+                    <td>${product.title}</td>
+                    <td>${product.type}</td>
+                    <td><img src="${product.image_src}" alt="Image" width="100"></td>
+                    <td>${product.variant_price}</td>
+                    <td>${product.variant_sku}</td>
+                    <td>${product.published}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>Search Products</h2>
+    <label for="search">Search:</label>
+    <input type="text" id="search" onkeyup="searchProducts()" placeholder="Search all columns...">
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Handle</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Image Src</th>
+                <th>Variant Price</th>
+                <th>Variant SKU</th>
+                <th>Published</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+</body>
+</html>
