@@ -3,9 +3,25 @@ version: "3"
 services:
   web:
     build: .
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
     ports: "8000:8000"
-  redis:
-    image: "redis:alpine"
-  celery:
-    build: .
-    command:  celery -A product_management worker --loglevel=info
+    networks:
+      - django_network
+#
+#  celery:
+#    build: .
+#    command:  celery -A product_management worker --loglevel=info
+#    volumes:
+#      - .:/app
+#    depends_on:
+#      - redis
+#    networks:
+#      - django_network
+
+# Create network bridge
+networks:
+  django_network:
+    driver: bridge
+

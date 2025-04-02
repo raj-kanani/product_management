@@ -5,11 +5,39 @@
     <title>Import product</title>
 </head>
 <body>
-    <form id="importForm" enctype="multipart/form-data">
-        <label for="csvFile"> Select csv file</label>
-        <input type="file" id="csvFile" name="file" accept=".csv">
-        <button type="file"
-    </form>
+    <label for="search"> Search:</label>
+    <input type="text" id="search" onkeyup="filterTable()" placeholder="Search all columns...">
 
+    <table id="productTable" class="display">
+        <thread>
+            <tr>
+                <th> Handle </th>
+                <th> Title </th>
+                <th> Type </th>
+                <th> Image src </th>
+                <th> Variant Price </th>
+                <th> Variant SKU </th>
+                <th> Published </th>
+            </tr>
+        </thread>
+     <tbody>
+        <tr>
+            <td>Product 1</td>
+            <td>Clothing</td>
+            <td><img src="https://www.google.com/imgres?q=image&imgurl=https%3A%2F%2Fplus.unsplash.com%2Fpremium_photo-1664474619075-644dd191935f%3Ffm%3Djpg%26q%3D60%26w%3D3000%26ixlib%3Drb-4.0.3%26ixid%3DM3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%253D&imgrefurl=https%3A%2F%2Funsplash.com%2Fs%2Fphotos%2Fimage&docid=ExDvm63D_wCvSM&tbnid=2brKLR3s5kTpPM&vet=12ahUKEwiDic2zzLiMAxUGzjgGHaiODqIQM3oECBgQAA..i&w=3000&h=2003&hcb=2&itg=1&ved=2ahUKEwiDic2zzLiMAxUGzjgGHaiODqIQM3oECBgQAA" alt="Image"></td>
+            <td>Electronic</td>
+            <td>99.99</td>
+            <td>SKU12345</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td><img src="https://www.google.com/imgres?q=image&imgurl=https%3A%2F%2Fplus.unsplash.com%2Fpremium_photo-1664474619075-644dd191935f%3Ffm%3Djpg%26q%3D60%26w%3D3000%26ixlib%3Drb-4.0.3%26ixid%3DM3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%253D&imgrefurl=https%3A%2F%2Funsplash.com%2Fs%2Fphotos%2Fimage&docid=ExDvm63D_wCvSM&tbnid=2brKLR3s5kTpPM&vet=12ahUKEwiDic2zzLiMAxUGzjgGHaiODqIQM3oECBgQAA..i&w=3000&h=2003&hcb=2&itg=1&ved=2ahUKEwiDic2zzLiMAxUGzjgGHaiODqIQM3oECBgQAA" alt="Image"></td>
+            <td>Furniture</td>
+            <td>2000</td>
+            <td>SKU56789</td>
+            <td>NO</td>
+        </tr>
+     </tbody>
+    </table>
 </body>
 </html>
