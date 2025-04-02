@@ -52,7 +52,10 @@ Payload :
     "num_products":1000
 }
 # Soft delete & Hard delete product (via celery)
-DELETE:	http://127.0.0.1:8000/api/delete-product/	
+POST :http://127.0.0.1:8000/api/delete-product/
+Payload : {
+    "product_ids": [10,11]
+}
 
 # Search product :
 GET: http://127.0.0.1:8000/api/search-products/?query=dsf
